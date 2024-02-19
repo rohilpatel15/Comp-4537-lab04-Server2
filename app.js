@@ -59,4 +59,4 @@ http.createServer(function(req, res) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Page not found');
     }
-}). listen(PROCCESS.ENV.PORT || 3000);
+}). listen(env.PORT || 3000);
