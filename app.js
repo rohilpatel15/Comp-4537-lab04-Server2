@@ -1,8 +1,8 @@
 const http = require('http');
 const url = require('url');
-
+const process = require('process');
 const endpoint = "/api/definitions";
-
+const port = process.env.PORT || 3000;
 let dictionary = [];
 
 http.createServer(function(req, res) {
@@ -59,4 +59,4 @@ http.createServer(function(req, res) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Page not found');
     }
-}). listen(env.PORT || 3000);
+}). listen(port);
