@@ -1,14 +1,11 @@
+// This class defines the dictionary
 module.exports = class Dictionary {
-    constructor(key, data) {
-      this.key = key;
-      this.data = data;
+    constructor(words, def) {
+      this.words = words;
+      this.def = def;
     }
   
-    getKey() {
-      return this.key;
-    }
-  
-    getData() {
-      return this.data;
+    getDefinition() {
+      return this.def;
     }
   };

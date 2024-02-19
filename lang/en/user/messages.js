@@ -1,3 +1,4 @@
+// This class defines the messages displayed to the user
 module.exports = class messages{
     constructor() {
       this.msgList = {
