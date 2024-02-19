@@ -8,8 +8,8 @@ let dictionary = [];
 http.createServer(function(req, res) {
     res.writeHead(200, { 
         'Content-Type': 'application/json',
-        "access-control-allow-origin": "*",
-        "access-control-allow-methods": "GET, POST"
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST"
     });
 
     console.log(req.headers);
