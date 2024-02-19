@@ -1,62 +1,54 @@
-const http = require('http');
+const html = require('http');
 const url = require('url');
 const process = require('process');
-const endpoint = "/api/definitions";
+const recordManager = require('./modules/record_manager.js');
+const messages = require('./lang/en/user/user_msg');
+
 const port = process.env.PORT || 3000;
-let dictionary = [];
 
-http.createServer(function(req, res) {
-    res.writeHead(200, { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': '*'
-    });
+const GET = 'GET';
+const POST = 'POST';
+const endpoint = '/api/definitions/';
+let reqCount = 0;
+const records = new recordManager();
+const msg = new messages();
 
-    console.log(req.headers);
-
-    if (req.method === POST && req.url === endpoint) {
-        let body = '';
-        req.on('data', function (chunk) {
-            if (chunk !== null) {
-                body += chunk;
-            }
-        });
-
-        // CHECK THIS FUNCTION
-        req.on('end', function() {
-            const { word, definition } = JSON.parse(body);
-            const existingEntry = dictionary.find(entry => entry.word === word);
-
-            if (existingEntry) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ error: `Word '${word}' already exists.` }));
-            }
-
-            dictionary.push({ word, definition });
-            res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                message: `Request #${dictionary.length}`,
-                totalEntries: dictionary.length
-            }));
-        });
-    } 
-    // CHECK THIS FUNCTION
-    if (req.method === GET) {
-        const word = reqUrl.query.word;
-        const entry = dictionary.find(entry => entry.word === word);
-
-        if (!entry) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: `Word '${word}' not found.` }));
-        }
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ word: entry.word, definition: entry.definition }));
-    } 
-
-    // Send to a 404 page
-    else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Page not found');
+const server = html.createServer((req, res) => {
+  
+  res.writeHead(200, {'Content-Type': 'text/plain',
+                      'Access-Control-Allow-Origin': '*',
+                      'Access-Control-Allow-Methods': '*'});
+  if (req.method === GET) {
+    reqCount++;
+    const query = url.parse(req.url, true).query;
+    if (query.word) {
+      res.write(records.getRecord(query.word));
+    } else {
+      res.write(msg.error());
     }
-}). listen(port);
+    res.end();
+    
+  }
+  if (req.method === POST && req.url === endpoint) {
+    reqCount++;
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      const data = JSON.parse(body);
+      if (data.word && data.definition) {
+        res.end(msg.requestCount(reqCount) + ' ' + records.addRecord(data.word, data.definition));
+      } else {
+        res.end(msg.error());
+      }
+    });
+    
+  }
+  //res.end(msg.error());
+  
+});
+
+server.listen(port, () => {
+  console.log('Server is listening on port ' + port);
+});
