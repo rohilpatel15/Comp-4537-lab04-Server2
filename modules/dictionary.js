@@ -1,4 +1,4 @@
-module.exports = class Record {
+module.exports = class Dictionary {
     constructor(key, data) {
       this.key = key;
       this.data = data;

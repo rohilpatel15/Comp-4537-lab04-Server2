@@ -1,52 +1,43 @@
 const html = require('http');
 const url = require('url');
 const process = require('process');
-const recordManager = require('./modules/record_manager.js');
-const messages = require('./lang/en/user/user_msg');
-
+const helper = require('./modules/dictionaryHelper.js');
+const messages = require('./lang/en/user/messages.js');
 const port = process.env.PORT || 3000;
-
-const GET = 'GET';
-const POST = 'POST';
 const endpoint = '/api/definitions/';
-let reqCount = 0;
-const records = new recordManager();
+const words = new helper();
 const msg = new messages();
+let counter = 0;
 
 const server = html.createServer((req, res) => {
-  
-  res.writeHead(200, {'Content-Type': 'text/plain',
-                      'Access-Control-Allow-Origin': '*',
-                      'Access-Control-Allow-Methods': '*'});
-  if (req.method === GET) {
-    reqCount++;
+  res.writeHead(200, {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': '*'});
+  if (req.method === 'GET') {
+    counter++;
     const query = url.parse(req.url, true).query;
     if (query.word) {
-      res.write(records.getRecord(query.word));
+      res.write(words.getWord(query.word));
     } else {
       res.write(msg.error());
     }
     res.end();
-    
   }
-  if (req.method === POST && req.url === endpoint) {
-    reqCount++;
+
+  if (req.method === 'POST' && req.url === endpoint) {
+    counter++;
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
     });
+
     req.on('end', () => {
       const data = JSON.parse(body);
       if (data.word && data.definition) {
-        res.end(msg.requestCount(reqCount) + ' ' + records.addRecord(data.word, data.definition));
+        res.end(msg.requestCount(counter) + ' ' + words.addWord(data.word, data.definition));
       } else {
         res.end(msg.error());
       }
-    });
-    
+    }); 
   }
-  //res.end(msg.error());
-  
 });
 
 server.listen(port, () => {
